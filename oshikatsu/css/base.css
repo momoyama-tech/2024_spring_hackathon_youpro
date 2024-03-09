@@ -1,0 +1,71 @@
+:root{
+	--main-theme-color : #730065;
+	--main-text-color :#322733;
+	--header-height : 9vh;
+	--footer-height : 9vh;	
+}
+body{
+	width : 100vw;
+	height : calc(var(--vh, 1vh) * 100);
+
+	margin : 0;
+	padding : 0;
+
+	font-size : 16px;
+
+	
+}
+header{
+	background-color: #f88df5;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	font-size : 1.5rem;
+
+	padding : 0 1rem;
+	height : var(--header-height);
+}
+footer{
+	display: flex;
+	align-items: center;
+	background-color: #f88df5;
+	height : var(--footer-height);
+}
+main{
+	display:flex;
+	flex-direction:column;
+	justify-content: space-between;
+}
+
+
+ul{
+	padding : 0;
+	margin : 0;
+}
+li{
+	list-style:none;
+}
+dialog{
+	min-width : 40%;
+}
+button.menu{	
+
+	background-color: transparent;
+	background-image: url("../img/menu.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+
+	border-style: none;
+	height : 2rem;
+	width : 2rem;
+}
+button.go{
+	border : none;
+	border-radius: 50%;
+	font-size : 1rem;
+	width : 3rem;
+	height : 3rem;
+
+	/*margin : 0.2rem;*/
+}

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>マップ</title>
+
+	<script	src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=marker&v=beta" async defer></script>
+	<script src="./js/storage.js"></script>
+	<script src="./js/common.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="./css/base.css">
+	<style>
+	main{
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+
+		height : calc( 100% - (var(--header-height) + var(--footer-height)) );
+	}
+	footer{
+		justify-content: space-between;
+		padding : 0 1rem;
+	}
+	#map {
+		width: 100vw;
+		height: 100%;
+	}
+	#spot-list li{
+		margin: 0.5rem 0;
+	}
+	.pin-spot {
+		background-color: #FF0000;
+		color: #FFFFFF;
+		padding: 8px 16px;
+		border-radius: 8px;
+	}
+	button#bt-spot-list{
+		height : 3rem;
+	}
+	button#bt-close{
+		width : 100%;
+		height : 3rem;
+	}
+	button.start
+	{
+		background-color: #4435c3;
+	}
+	#bt-catch{
+		width : 100%;
+		padding : 0.5rem;
+	}
+
+	</style>
+
+	<script>
+		let map = null;
+		let myMarker = null;
+		let spotMarkers = null;
+	
+		let myLocation = null;	
+	
+		function initMap() {		
+	
+			map = new google.maps.Map(document.getElementById('map'), {
+				zoom: 16,
+				gestureHandling: 'greedy',
+				mapId: ''
+			});
+	
+			const storage = new Storage();
+	
+			for (const location of storage.locations) {
+	
+				if( location['isCatch'] != 'undefined' && location['isCatch'] == true ) continue;
+	
+				const pinSpot = document.createElement('div');
+				pinSpot.classList.add('pin-spot');
+				pinSpot.innerHTML = location.spotName;
+					new google.maps.marker.AdvancedMarkerView({
+					map,
+					position: { lat: location.lat, lng: location.lon },
+					content: pinSpot
+				});
+			}
+		}
+	</script>
+	<script type="module">
+	import GPS from './modules/gps.js';	
+
+	const storage = new Storage();
+
+	let startLocation = null;
+	let isGo = false;
+
+	window.onload = function () {		
+
+		const dlg = document.querySelector('#spot-list');
+
+		const list = dlg.querySelector('ul');
+		for(const location of storage.locations )
+		{
+			const item = document.createElement('li');
+			item.innerHTML = location.spotName;
+			list.append( item );
+		}
+
+		const bt = document.querySelector('#bt-spot-list');
+		bt.onclick = () => {
+			dlg.showModal();
+		};
+
+		const bt_close = document.querySelector('#bt-close');
+		bt_close.onclick = () => {
+			dlg.close();
+		};
+
+		const bt_go = document.querySelector('#bt-go');
+		bt_go.onclick = () => {
+			isGo = true;
+		}
+
+		// GPSオブジェクトの生成
+		const gps = new GPS((location) => {
+
+			if(isGo){
+				startLocation = location;
+				document.querySelector('button#bt-go').classList.add('start');
+			}else{
+				document.querySelector('button#bt-go').classList.remove('start');
+			}
+
+			map.setCenter(new google.maps.LatLng(location.latitude, location.longitude));
+
+			const pinMe = new google.maps.marker.PinView({
+				background: '#FF0000'
+			});
+
+			if (myMarker) {
+				myMarker.map = null;
+			}
+
+			myMarker = new google.maps.marker.AdvancedMarkerView({
+				map,
+				position: { lat: location.latitude, lng: location.longitude },
+				content: pinMe.element
+			});
+			
+			for (const spot of storage.locations){
+
+				console.log(spot);
+
+				const distance = gps.getDistance(location, { 'latitude': spot.lat, 'longitude': spot.lon });
+
+				if (distance <= 0.8) {					
+					if(startLocation != null){
+						
+						const point = gps.getDistance(startLocation, { 'latitude': spot.lat, 'longitude': spot.lon });
+
+						spot['isCatch'] = true;						
+						storage.save();
+
+						const dlg = document.querySelector('#dlg-stamp');
+						dlg.showModal();
+
+						isGo = false;						
+					}
+				};
+			}
+
+			if(isGo == false){
+				startLocation = null;
+			}
+
+			const bt_catch = document.querySelector('#bt-catch');
+			bt_catch.onclick = () => {
+				const dialog = document.querySelector('#dlg-stamp');
+				dialog.close();
+			};
+		});
+
+		// GPS座標の受信開始
+		gps.start();
+
+		document.querySelector('.menu').onclick = () => {
+			window.location = './stamp_list.html';
+		};
+	}
+	</script>
+
+
+
+</head>
+
+<body>
+	<header>
+		<div>中二病でも恋がしたい</div>
+		<button class="menu"></button>
+	</header>
+	<main>
+		<div id="map"></div>
+
+		<dialog id="spot-list">
+			<p style="margin:0px;padding:0px;text-align:center;">聖地リスト</p>
+			<ul></ul>
+			<button id="bt-close">閉じる</button>
+		</dialog>
+
+		<dialog id="dlg-stamp">
+			<p>聖地到着！スタンプをGet！</p>
+			<button id="bt-catch">閉じる</button>
+		</dialog>
+
+	</main>
+	<footer>
+		<button id="bt-go" class="go">GO!</button>
+		<button id="bt-spot-list">聖地リスト</button>
+	</footer>
+</body>
+
+</html>

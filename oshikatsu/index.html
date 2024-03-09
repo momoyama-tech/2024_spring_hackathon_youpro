@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>オシカツ！</title>
+	<link rel="stylesheet" type="text/css" href="./css/base.css">	
+	<script src="./js/common.js"></script>
+
+	<style>
+	main{
+		display: flex;
+		justify-content: space-between;
+
+		height : 100%;
+	}
+	h1{
+		font-size : 200%;
+		text-align : center;
+
+		padding : 3rem;
+	}
+	form{
+		display: flex;
+		flex-direction: column;
+		row-gap: 1rem;
+
+		padding : 1rem;
+	}
+
+	form select , form input{
+		font-size : 2rem;
+	}
+	form input{
+		padding : 0.25rem;
+		border : none;
+		background-color : #f88df5;
+	}
+
+	</style>
+</head>
+<body>
+	<main>
+		<img src="./img/logo.png">
+		
+		<form action="map.html">
+			<select name="title">
+				<option value="chuni">中二病でも恋がしたい</option>
+				<option value="yuru-camp">ゆるキャン</option>
+			</select>
+			<input type="submit" value="Start">
+		</form>
+
+	</main>
+</body>
+</html>

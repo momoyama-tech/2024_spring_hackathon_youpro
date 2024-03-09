@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>スタンプリスト</title>
+	
+	<link rel="stylesheet" type="text/css" href="./css/base.css">
+	<script src="./js/storage.js"></script>
+	<script src="./js/common.js"></script>
+
+	<style>
+	main{
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	ul#stamp_list{
+		display: flex;
+		flex-wrap: wrap;
+	}
+	ul#stamp_list li{
+		margin : 0.5rem;
+		width : 10rem;
+		border : 1px solid #CCCCCC;
+		text-align : center;
+	}
+	ul#stamp_list li.catch img{
+		opacity: 1.0;
+	}
+	ul#stamp_list li img{
+		width : 5rem;
+		height: 5rem;
+		opacity: 0.05;
+	}
+	#point{
+		padding : 0.5rem 0;
+		font-size : 1.5rem;
+		text-align: center;
+	}
+	</style>
+
+	<script>	
+
+	window.onload = function(){
+
+		const storage = new Storage();
+
+		const list = document.querySelector('#stamp_list');
+		for(const location of storage.locations)
+		{
+			const stamp = document.createElement('li');
+			if( location['isCatch'] ){
+				stamp.classList.add('catch');
+			}
+			stamp.innerHTML = `
+			<img src="./img/catch.png">
+			<div>${location.spotName}</div>`;
+			
+			list.append( stamp );
+		}
+
+		document.querySelector('.menu').onclick = () => {
+			window.location = './map.html';
+		};
+
+		document.querySelector('#point').innerHTML = `累計ポイント：${13}`;
+
+	};
+
+	</script>
+	
+</head>
+<body>
+    <header>
+		<div>あつめたスタンプ</div>
+		<button class="menu"></button>
+    </header>
+	<main>
+		<div id="point"></div>
+		<ul id="stamp_list"></ul>
+	</main>
+</body>
+</html>

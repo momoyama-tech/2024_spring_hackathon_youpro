@@ -1,0 +1,129 @@
+<!--
+	GPS + GoogleMap 連携検証プログラム
+
+	作成者：大西 智持
+-->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+
+	<style>
+	#map{
+		width : 100vw;
+		height : 100vh;
+	}
+	.pin-spot{
+		background-color: #FF0000;
+		color : #FFFFFF;
+		padding : 8px 16px;
+		border-radius: 8px;
+	}
+	</style>
+
+	<!-- GoogleMap APIの読込み -->
+	<script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=marker&v=beta" async defer></script>
+
+	<title>GPS + GoogleMap 動作検証プログラム</title>
+
+	<script>
+	let map = null;
+	let myMarker = null;
+	let spotMarkers = null;
+
+	let myLocation = null;
+
+	// GoogleMapの初期化処理
+	function initMap() {
+		// 地図表示
+		map = new google.maps.Map(document.getElementById('map'), {
+			zoom: 16,
+			gestureHandling: 'greedy',
+			mapId: ''
+		});
+		
+		spotMarkers = [
+			{'spotName':'hello','lat':34.461184758557955,'lon':135.4560602779845},
+			{'spotName':'world','lat':34.561184758557955,'lon':135.4560602779845}
+		];
+
+		for(const spotMarker of spotMarkers)
+		{
+			const pinSpot = document.createElement('div');
+			pinSpot.classList.add('pin-spot');
+			pinSpot.innerHTML = spotMarker.spotName;
+
+			new google.maps.marker.AdvancedMarkerView({
+				map,
+				position:{lat: spotMarker.lat, lng: spotMarker.lon},
+				content: pinSpot
+			});
+		}
+	}
+	</script>
+
+	<script type="module">
+	// GPSオブジェクトのインポート
+	import GPS from './modules/gps.js';
+
+	// ページの読込み完了後のイベント
+	window.onload = function(){
+		
+		// GPSオブジェクトの生成
+		// 生成時の引数にGPS座標更新時に呼び出される関数を与える（コールバック）
+		const gps = new GPS((location)=>{
+			// 引数 location には更新された座標情報が格納されている
+			
+			const latitude = document.querySelector('#latitude');
+			latitude.innerHTML = location.latitude;
+
+			const longitude = document.querySelector('#longitude');
+			longitude.innerHTML = location.longitude;
+
+			// マップを自分の位置中心に移動
+			map.setCenter(new google.maps.LatLng(location.latitude, location.longitude));
+			
+			const pinMe = new google.maps.marker.PinView({
+				background: '#FF0000'
+			});
+
+			// 直前の自分のマーカーを削除
+			if(myMarker){
+				myMarker.map = null;
+			}
+
+			// 新しい自分のマーカーを表示
+			myMarker = new google.maps.marker.AdvancedMarkerView({
+				map,
+				position:{lat: location.latitude, lng: location.longitude},
+				content: pinMe.element
+			});
+
+			// 自身の現在位置との距離を求める
+			for(const spotMarker of spotMarkers){
+				const distance = gps.getDistance(location,{'latitude':spotMarker.lat,'longitude':spotMarker.lon});
+				console.log( distance );
+			}
+
+		});
+
+		// GPS座標の受信開始
+		gps.start();
+
+	}
+
+	</script>
+
+</head>
+<body>
+	<main>
+		経度
+		<div id="latitude"></div>
+		緯度
+		<div id="longitude"></div>
+
+		<div id="map"></div>
+	</main>
+</body>
+</html>
